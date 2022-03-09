@@ -41,8 +41,8 @@ namespace Service.Crypto.Notifications.Subscribers
 
                 var status = withdrawal.Status switch
                 {
-                WithdrawalStatus.Success => "Success",
-                WithdrawalStatus.Cancelled => "Cancelled",
+                    WithdrawalStatus.Success => "Success",
+                    WithdrawalStatus.Cancelled => "Cancelled",
                     WithdrawalStatus.BlockchainPending => "BlockchainPending",
                     WithdrawalStatus.BlockchainProcessing => "BlockchainProcessing",
                     _ => "",
@@ -53,9 +53,11 @@ namespace Service.Crypto.Notifications.Subscribers
                     return;
                 }
 
+                var error = !string.IsNullOrEmpty(withdrawal.LastError) ? $"Error: {withdrawal.LastError}" : "";
                 await _telegramBotClient.SendTextMessageAsync(chatId,
-                $"WITHDRAWAL {status}! Transaction Id: {withdrawal.TransactionId} ({withdrawal.AssetSymbol}): {withdrawal.Amount}. BrokerId: {withdrawal.BrokerId}; ClientId: {withdrawal.ClientId}. Retries:  {withdrawal.RetriesCount}");
-    }
+                $"WITHDRAWAL {status}! Transaction Id: {withdrawal.TransactionId} ({withdrawal.AssetSymbol}): {withdrawal.Amount}. BrokerId: {withdrawal.BrokerId}; ClientId: {withdrawal.ClientId}. Retries: {withdrawal.RetriesCount};" +
+                $"WorkflowState: {withdrawal.WorkflowState};" + error);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error Withdrawal {@context}", withdrawal.ToJson());
