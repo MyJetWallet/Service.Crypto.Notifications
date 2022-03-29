@@ -43,10 +43,16 @@ namespace Service.Crypto.Notifications.Subscribers
                     withdrawal.Status == WithdrawalStatus.Success ||
                     withdrawal.WorkflowState == WithdrawalWorkflowState.Failed)
                 {
+                    string mark = "⚠️";
+                    if (withdrawal.Status == WithdrawalStatus.Cancelled || withdrawal.WorkflowState == WithdrawalWorkflowState.Failed)
+                    {
+
+                    }
                     var error = !string.IsNullOrEmpty(withdrawal.LastError) ? $"Error: {withdrawal.LastError}" : "";
                     await _telegramBotClient.SendTextMessageAsync(chatId,
-                    $"WITHDRAWAL {withdrawal.Status}! Transaction Id: {withdrawal.TransactionId} ({withdrawal.AssetSymbol}): {withdrawal.Amount}. BrokerId: {withdrawal.BrokerId}; ClientId: {withdrawal.ClientId}. Retries: {withdrawal.RetriesCount};" +
-                    $"WorkflowState: {withdrawal.WorkflowState};" + error);
+                    $"WITHDRAWAL {withdrawal.Status} {mark}! ID: ({withdrawal.Id}) {withdrawal.Amount} ({withdrawal.AssetSymbol})." +
+                    $"{Environment.NewLine}BrokerId: {withdrawal.BrokerId}; ClientId: {withdrawal.ClientId}. Retries: {withdrawal.RetriesCount}; {Environment.NewLine}" +
+                    $"WorkflowState: {withdrawal.WorkflowState}; {Environment.NewLine}" + error);
                 }
             }
             catch (Exception ex)

@@ -40,7 +40,7 @@ namespace Service.Crypto.Notifications.Subscribers
 
                 var status = deposit.Status switch
                 {
-                    DepositStatus.Error => "Failed",
+                    DepositStatus.Error => "Failed ⚠️",
                     DepositStatus.Processed => "Succesfull",
                     DepositStatus.Cancelled => "Cancelled",
                     _ => "",
@@ -51,8 +51,9 @@ namespace Service.Crypto.Notifications.Subscribers
                     return;
                 }
 
-                await _telegramBotClient.SendTextMessageAsync(chatId,
-                $"DEPOSIT {status}! Transaction Id: {deposit.TransactionId} ({deposit.AssetSymbol} - {deposit.Network}): {deposit.Amount}. BrokerId: {deposit.BrokerId}; ClientId: {deposit.ClientId}. Retries:  {deposit.RetriesCount}");
+                var message = $"DEPOSIT {status}! ID:{deposit.Id} {deposit.Amount} {deposit.AssetSymbol} ({deposit.Network}). {Environment.NewLine}" +
+                    $" BrokerId: {deposit.BrokerId}; ClientId: {deposit.ClientId}. Retries:  {deposit.RetriesCount}";
+                await _telegramBotClient.SendTextMessageAsync(chatId, message);
 
             }
             catch (Exception ex)
