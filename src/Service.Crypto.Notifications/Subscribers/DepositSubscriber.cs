@@ -1,10 +1,9 @@
-﻿using DotNetCoreDecorators;
+﻿using System;
+using System.Threading.Tasks;
+using DotNetCoreDecorators;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Service.Bitgo.DepositDetector.Domain.Models;
-using Service.Fireblocks.Webhook.ServiceBus.Deposits;
-using System;
-using System.Threading.Tasks;
 using Telegram.Bot;
 
 namespace Service.Crypto.Notifications.Subscribers
@@ -28,12 +27,16 @@ namespace Service.Crypto.Notifications.Subscribers
         {
             using var activity = MyTelemetry.StartActivity("Handle Deposit");
 
-            _logger.LogInformation("Processing Depositt: {@context}", deposit.ToJson());
+            _logger.LogInformation("Processing Deposit: {@context}", deposit.ToJson());
 
             try
             {
-                var chatId = deposit.Status == DepositStatus.Processed ? Program.Settings.SuccessDepositChatId :
-                    Program.Settings.FailDepositChatId;
+                var chatId = deposit.Status switch
+                {
+                    DepositStatus.ManualApprovalPending => Program.Settings.ManualApproveDepositChatId,
+                    DepositStatus.Processed => Program.Settings.SuccessDepositChatId,
+                    _ => Program.Settings.FailDepositChatId
+                };
 
                 if (string.IsNullOrEmpty(chatId))
                     return;
@@ -41,20 +44,19 @@ namespace Service.Crypto.Notifications.Subscribers
                 var status = deposit.Status switch
                 {
                     DepositStatus.Error => "Failed ⚠️",
-                    DepositStatus.Processed => "Succesfull",
+                    DepositStatus.Processed => "Successful",
                     DepositStatus.Cancelled => "Cancelled",
-                    _ => "",
+                    DepositStatus.ManualApprovalPending => "MANUAL APPROVAL PENDING",
+                    _ => ""
                 };
 
-                if (string.IsNullOrEmpty(status))
-                {
-                    return;
-                }
+                if (string.IsNullOrEmpty(status)) return;
 
-                var message = $"DEPOSIT {status}! ID:{deposit.Id} {deposit.Amount} {deposit.AssetSymbol} ({deposit.Network}). {Environment.NewLine}" +
+                var message =
+                    $"DEPOSIT {status}! ID:{deposit.Id} {deposit.Amount} {deposit.AssetSymbol} ({deposit.Network}). {Environment.NewLine}" +
                     $" BrokerId: {deposit.BrokerId}; ClientId: {deposit.ClientId}. Retries:  {deposit.RetriesCount}";
-                await _telegramBotClient.SendTextMessageAsync(chatId, message);
 
+                await _telegramBotClient.SendTextMessageAsync(chatId, message);
             }
             catch (Exception ex)
             {

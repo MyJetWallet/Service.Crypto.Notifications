@@ -39,6 +39,9 @@ namespace Service.Crypto.Notifications.Settings
         [YamlProperty("CryptoNotifications.FailFireblocksDepositChatId")]
         public string FailFireblocksDepositChatId { get; set; }
 
+        [YamlProperty("CryptoNotifications.ManualApproveDepositChatId")]
+        public string ManualApproveDepositChatId { get; set; }
+        
         [YamlProperty("CryptoNotifications.SuccessDepositChatId")]
         public string SuccessDepositChatId { get; set; }
 
