@@ -43,11 +43,12 @@ namespace Service.Crypto.Notifications.Subscribers
                     withdrawal.Status == WithdrawalStatus.Success ||
                     withdrawal.WorkflowState == WithdrawalWorkflowState.Failed)
                 {
-                    string mark = "⚠️";
+                    string mark = "👌";
                     if (withdrawal.Status == WithdrawalStatus.Cancelled || withdrawal.WorkflowState == WithdrawalWorkflowState.Failed)
                     {
-
+                        mark = "⚠️";
                     }
+
                     var error = !string.IsNullOrEmpty(withdrawal.LastError) ? $"Error: {withdrawal.LastError}" : "";
                     await _telegramBotClient.SendTextMessageAsync(chatId,
                     $"WITHDRAWAL {withdrawal.Status} {mark}! ID: ({withdrawal.Id}) {withdrawal.Amount} ({withdrawal.AssetSymbol})." +

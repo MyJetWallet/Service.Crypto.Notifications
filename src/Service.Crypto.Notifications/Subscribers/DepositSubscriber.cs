@@ -44,7 +44,7 @@ namespace Service.Crypto.Notifications.Subscribers
                 var status = deposit.Status switch
                 {
                     DepositStatus.Error => "Failed ⚠️",
-                    DepositStatus.Processed => "Successful",
+                    DepositStatus.Processed => "Successful 👌",
                     DepositStatus.Cancelled => "Cancelled",
                     DepositStatus.ManualApprovalPending => "MANUAL APPROVAL PENDING",
                     _ => ""
