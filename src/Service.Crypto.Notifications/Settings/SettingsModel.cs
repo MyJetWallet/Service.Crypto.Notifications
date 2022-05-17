@@ -47,5 +47,8 @@ namespace Service.Crypto.Notifications.Settings
 
         [YamlProperty("CryptoNotifications.FailDepositChatId")]
         public string FailDepositChatId { get; set; }
+        
+        [YamlProperty("CryptoNotifications.KycChatId")]
+        public string KycChatId { get; set; }
     }
 }

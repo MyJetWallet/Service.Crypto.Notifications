@@ -6,6 +6,7 @@ using Service.Bitgo.DepositDetector.Domain.Models;
 using Service.Bitgo.WithdrawalProcessor.Domain.Models;
 using Service.Crypto.Notifications.Subscribers;
 using Service.Fireblocks.Webhook.ServiceBus.Deposits;
+using Service.KYC.Domain.Models;
 using Telegram.Bot;
 
 namespace Service.Crypto.Notifications.Modules
@@ -38,6 +39,10 @@ namespace Service.Crypto.Notifications.Modules
                 Withdrawal.TopicName,
                 "service-crypto-notifications", MyServiceBus.Abstractions.TopicQueueType.Permanent);
 
+            builder.RegisterMyServiceBusSubscriberSingle<Verification>(serviceBusClient,
+                Verification.TopicName,
+                "service-crypto-notifications", MyServiceBus.Abstractions.TopicQueueType.Permanent);
+            
             builder
                .RegisterType<DepositSubscriber>()
                .AutoActivate()
@@ -57,6 +62,11 @@ namespace Service.Crypto.Notifications.Modules
                .RegisterType<FireblocksWithdrawalSignalSubscriber>()
                .AutoActivate()
                .SingleInstance();
+            
+            builder
+                .RegisterType<KycSubscriber>()
+                .AutoActivate()
+                .SingleInstance();
         }
     }
 }
