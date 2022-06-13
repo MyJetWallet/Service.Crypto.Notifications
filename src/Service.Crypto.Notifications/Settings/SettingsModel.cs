@@ -1,6 +1,5 @@
 ﻿using MyJetWallet.Sdk.Service;
 using MyYamlParser;
-using Telegram.Bot.Types;
 
 namespace Service.Crypto.Notifications.Settings
 {
@@ -51,9 +50,13 @@ namespace Service.Crypto.Notifications.Settings
         [YamlProperty("CryptoNotifications.KycChatId")]
         public string KycChatId { get; set; }
 
-        [YamlProperty("CryptoNotifications.CircleChatId")]
-        public string CircleChatId { get; set; }
+	    [YamlProperty("CryptoNotifications.CircleChatId")]
+	    public string CircleChatId { get; set; }
 
-        
+	    [YamlProperty("CryptoNotifications.HighYieldEngineServiceUrl")]
+	    public string HighYieldEngineServiceUrl { get; set; }
+
+	    [YamlProperty("CryptoNotifications.HighYieldChatId")]
+	    public string HighYieldChatId { get; set; }
     }
 }

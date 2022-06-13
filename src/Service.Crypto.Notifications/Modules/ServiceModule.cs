@@ -1,13 +1,15 @@
 ﻿using Autofac;
-using Autofac.Core;
-using Autofac.Core.Registration;
 using MyJetWallet.Sdk.ServiceBus;
+using MyServiceBus.Abstractions;
 using Service.Bitgo.DepositDetector.Domain.Models;
 using Service.Bitgo.WithdrawalProcessor.Domain.Models;
 using Service.Circle.Webhooks.Domain.Models;
 using Service.ClientRiskManager.Subscribers;
 using Service.Crypto.Notifications.Subscribers;
+using Service.Fireblocks.Webhook.ServiceBus;
 using Service.Fireblocks.Webhook.ServiceBus.Deposits;
+using Service.HighYieldEngine.Client;
+using Service.HighYieldEngine.Domain.Models;
 using Service.KYC.Domain.Models;
 using Telegram.Bot;
 
@@ -25,32 +27,38 @@ namespace Service.Crypto.Notifications.Modules
                 Program.ReloadedSettings(e => e.SpotServiceBusHostPort),
                 Program.LogFactory);
 
-            builder.RegisterMyServiceBusSubscriberSingle<FireblocksWithdrawalSignal>(serviceBusClient,
-                Service.Fireblocks.Webhook.ServiceBus.Topics.FireblocksWithdrawalSignalTopic,
-                "service-crypto-notifications", MyServiceBus.Abstractions.TopicQueueType.Permanent);
+	        const string queueName = "service-crypto-notifications";
 
-            builder.RegisterMyServiceBusSubscriberSingle<FireblocksDepositSignal>(serviceBusClient,
-                Service.Fireblocks.Webhook.ServiceBus.Topics.FireblocksDepositSignalTopic,
-                "service-crypto-notifications", MyServiceBus.Abstractions.TopicQueueType.Permanent);
+	        builder.RegisterMyServiceBusSubscriberSingle<FireblocksWithdrawalSignal>(serviceBusClient,
+		        Topics.FireblocksWithdrawalSignalTopic,
+		        queueName, TopicQueueType.Permanent);
 
-            builder.RegisterMyServiceBusSubscriberSingle<Deposit>(serviceBusClient,
-                Deposit.TopicName,
-                "service-crypto-notifications", MyServiceBus.Abstractions.TopicQueueType.Permanent);
+	        builder.RegisterMyServiceBusSubscriberSingle<FireblocksDepositSignal>(serviceBusClient,
+		        Topics.FireblocksDepositSignalTopic,
+		        queueName, TopicQueueType.Permanent);
 
-            builder.RegisterMyServiceBusSubscriberSingle<Withdrawal>(serviceBusClient,
-                Withdrawal.TopicName,
-                "service-crypto-notifications", MyServiceBus.Abstractions.TopicQueueType.Permanent);
+	        builder.RegisterMyServiceBusSubscriberSingle<Deposit>(serviceBusClient,
+		        Deposit.TopicName,
+		        queueName, TopicQueueType.Permanent);
 
-            builder.RegisterMyServiceBusSubscriberSingle<Verification>(serviceBusClient,
-                Verification.TopicName,
-                "service-crypto-notifications", MyServiceBus.Abstractions.TopicQueueType.Permanent);
+	        builder.RegisterMyServiceBusSubscriberSingle<Withdrawal>(serviceBusClient,
+		        Withdrawal.TopicName,
+		        queueName, TopicQueueType.Permanent);
 
-            builder
-            .RegisterMyServiceBusSubscriberSingle<SignalCircleChargeback>(
-                serviceBusClient,
-                SignalCircleChargeback.ServiceBusTopicName,
-                "service-crypto-notifications",
-                MyServiceBus.Abstractions.TopicQueueType.Permanent);
+	        builder.RegisterMyServiceBusSubscriberSingle<Verification>(serviceBusClient,
+		        Verification.TopicName,
+		        queueName, TopicQueueType.Permanent);
+
+	        builder.RegisterMyServiceBusSubscriberSingle<ClientOfferAction>(serviceBusClient,
+		        ClientOfferAction.TopicName,
+		        queueName, TopicQueueType.Permanent);
+
+	        builder
+		        .RegisterMyServiceBusSubscriberSingle<SignalCircleChargeback>(
+			        serviceBusClient,
+			        SignalCircleChargeback.ServiceBusTopicName,
+			        "service-crypto-notifications",
+			        TopicQueueType.Permanent);
 
             builder
                .RegisterType<DepositSubscriber>()
@@ -71,7 +79,7 @@ namespace Service.Crypto.Notifications.Modules
                .RegisterType<FireblocksWithdrawalSignalSubscriber>()
                .AutoActivate()
                .SingleInstance();
-
+            
             builder
                .RegisterType<SignalCircleChargebackSubscriber>()
                .AutoActivate()
@@ -81,6 +89,13 @@ namespace Service.Crypto.Notifications.Modules
                 .RegisterType<KycSubscriber>()
                 .AutoActivate()
                 .SingleInstance();
+
+	        builder
+		        .RegisterType<ClientOfferActionSubscriber>()
+		        .AutoActivate()
+		        .SingleInstance();
+
+	        builder.RegisterHighYieldEngineNotificationService(Program.Settings.HighYieldEngineServiceUrl);
         }
     }
 }
