@@ -50,5 +50,10 @@ namespace Service.Crypto.Notifications.Settings
         
         [YamlProperty("CryptoNotifications.KycChatId")]
         public string KycChatId { get; set; }
+
+        [YamlProperty("CryptoNotifications.CircleChatId")]
+        public string CircleChatId { get; set; }
+
+        
     }
 }

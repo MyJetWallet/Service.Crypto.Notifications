@@ -27,7 +27,7 @@ namespace Service.Crypto.Notifications.Subscribers
         {
             using var activity = MyTelemetry.StartActivity("Handle FireblocksWithdrawalSignal");
 
-            _logger.LogInformation("Processing FireblocksWithdrawalSignal: {@context}", withdrawal.ToJson());
+            _logger.LogInformation("Processing FireblocksWithdrawalSignal: {context}", withdrawal.ToJson());
 
             try
             {
