@@ -95,6 +95,11 @@ namespace Service.Crypto.Notifications.Modules
 		        .AutoActivate()
 		        .SingleInstance();
 
+	        builder
+		        .RegisterType<OfferBlockStateChangedSubscriber>()
+		        .AutoActivate()
+		        .SingleInstance();
+
 	        builder.RegisterHighYieldEngineNotificationService(Program.Settings.HighYieldEngineServiceUrl);
         }
     }
