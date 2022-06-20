@@ -10,6 +10,7 @@ using Service.Fireblocks.Webhook.ServiceBus;
 using Service.Fireblocks.Webhook.ServiceBus.Deposits;
 using Service.HighYieldEngine.Client;
 using Service.HighYieldEngine.Domain.Models;
+using Service.HighYieldEngine.Domain.Models.Messages;
 using Service.KYC.Domain.Models;
 using Telegram.Bot;
 
@@ -51,6 +52,10 @@ namespace Service.Crypto.Notifications.Modules
 
 	        builder.RegisterMyServiceBusSubscriberSingle<ClientOfferAction>(serviceBusClient,
 		        ClientOfferAction.TopicName,
+		        queueName, TopicQueueType.Permanent);
+
+	        builder.RegisterMyServiceBusSubscriberSingle<OfferBlockStateChanged>(serviceBusClient,
+				OfferBlockStateChanged.TopicName,
 		        queueName, TopicQueueType.Permanent);
 
 	        builder
