@@ -4,6 +4,7 @@ using DotNetCoreDecorators;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Service.Bitgo.DepositDetector.Domain.Models;
+using Service.Crypto.Notifications.Deduplication;
 using Telegram.Bot;
 
 namespace Service.Crypto.Notifications.Subscribers
@@ -12,6 +13,7 @@ namespace Service.Crypto.Notifications.Subscribers
     {
         private readonly ILogger<DepositSubscriber> _logger;
         private readonly ITelegramBotClient _telegramBotClient;
+        private readonly LruCache<long, long> _deduplicationCache = new LruCache<long, long>(1000, x => x);
 
         public DepositSubscriber(
             ISubscriber<Deposit> subscriber,
@@ -27,10 +29,16 @@ namespace Service.Crypto.Notifications.Subscribers
         {
             using var activity = MyTelemetry.StartActivity("Handle Deposit");
 
-            _logger.LogInformation("Processing Deposit: {@context}", deposit.ToJson());
+            _logger.LogInformation("Processing Deposit: {context}", deposit.ToJson());
 
             try
             {
+                if (_deduplicationCache.TryGetItemByKey(deposit.Id, out _))
+                {
+                    _logger.LogDebug("Deposit deduplicated: {context}", deposit.ToJson());
+                    return;
+                }
+
                 var chatId = deposit.Status switch
                 {
                     DepositStatus.ManualApprovalPending => Program.Settings.ManualApproveDepositChatId,
@@ -57,6 +65,8 @@ namespace Service.Crypto.Notifications.Subscribers
                     $" BrokerId: {deposit.BrokerId}; ClientId: {deposit.ClientId}. Retries:  {deposit.RetriesCount}";
 
                 await _telegramBotClient.SendTextMessageAsync(chatId, message);
+
+                _deduplicationCache.AddItem(deposit.Id);
             }
             catch (Exception ex)
             {

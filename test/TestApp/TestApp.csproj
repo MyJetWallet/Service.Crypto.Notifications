@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Service.Crypto.Notifications.Client\Service.Crypto.Notifications.Client.csproj" />
     <ProjectReference Include="..\..\src\Service.Crypto.Notifications.Grpc\Service.Crypto.Notifications.Grpc.csproj" />
+    <ProjectReference Include="..\..\src\Service.Crypto.Notifications\Service.Crypto.Notifications.csproj" />
   </ItemGroup>
 
 </Project>

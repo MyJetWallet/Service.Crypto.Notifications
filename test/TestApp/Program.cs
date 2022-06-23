@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using ProtoBuf.Grpc.Client;
 using Service.Crypto.Notifications.Client;
+using Service.Crypto.Notifications.Deduplication;
 using Service.Crypto.Notifications.Grpc.Models;
 
 namespace TestApp
@@ -15,15 +16,28 @@ namespace TestApp
             Console.Write("Press enter to start");
             Console.ReadLine();
 
-
-            var factory = new CryptoNotificationsClientFactory("http://localhost:5001");
-            var client = factory.GetHelloService();
-
-            var resp = await  client.SayHelloAsync(new HelloRequest(){Name = "Alex"});
-            Console.WriteLine(resp?.Message);
+            var lruCache = new LruCache<string, string>(3, x => x);
+            lruCache.AddItem("1");
+            lruCache.AddItem("2");
+            lruCache.AddItem("3");
+            PrintLruCache(lruCache);
+            lruCache.AddItem("1");
+            PrintLruCache(lruCache);
+            lruCache.AddItem("4");
+            PrintLruCache(lruCache);
 
             Console.WriteLine("End");
             Console.ReadLine();
+        }
+
+        static void PrintLruCache(LruCache<string, string> cache)
+        {
+            Console.WriteLine();
+            foreach (var cacheItem in cache)
+            {
+                Console.WriteLine(cacheItem);
+            }
+            Console.WriteLine();
         }
     }
 }

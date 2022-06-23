@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Service.Bitgo.DepositDetector.Domain.Models;
 using Service.Bitgo.WithdrawalProcessor.Domain.Models;
+using Service.Crypto.Notifications.Deduplication;
 using Service.Fireblocks.Webhook.ServiceBus.Deposits;
 using System;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace Service.Crypto.Notifications.Subscribers
     {
         private readonly ILogger<WithdrawalSubscriber> _logger;
         private readonly ITelegramBotClient _telegramBotClient;
-
+        private readonly LruCache<long, long> _deduplicationCache = new LruCache<long, long>(1000, x => x);
         public WithdrawalSubscriber(
             ISubscriber<Withdrawal> subscriber,
             ILogger<WithdrawalSubscriber> logger,
@@ -33,6 +34,12 @@ namespace Service.Crypto.Notifications.Subscribers
 
             try
             {
+                if (_deduplicationCache.TryGetItemByKey(withdrawal.Id, out _))
+                {
+                    _logger.LogDebug("Withdrawal deduplicated: {context}", withdrawal.ToJson());
+                    return;
+                }
+
                 var chatId = withdrawal.Status != WithdrawalStatus.Cancelled ? Program.Settings.SuccessWithdrawalChatId :
                     Program.Settings.FailedWithdrawalChatId;
 
@@ -54,6 +61,8 @@ namespace Service.Crypto.Notifications.Subscribers
                     $"WITHDRAWAL {withdrawal.Status} {mark}! ID: ({withdrawal.Id}) {withdrawal.Amount} ({withdrawal.AssetSymbol})." +
                     $"{Environment.NewLine}BrokerId: {withdrawal.BrokerId}; ClientId: {withdrawal.ClientId}. Retries: {withdrawal.RetriesCount}; {Environment.NewLine}" +
                     $"WorkflowState: {withdrawal.WorkflowState}; {Environment.NewLine}" + error);
+
+                    _deduplicationCache.AddItem(withdrawal.Id);
                 }
             }
             catch (Exception ex)
