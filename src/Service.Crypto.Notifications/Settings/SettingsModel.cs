@@ -58,5 +58,8 @@ namespace Service.Crypto.Notifications.Settings
 
 	    [YamlProperty("CryptoNotifications.HighYieldChatId")]
 	    public string HighYieldChatId { get; set; }
+
+        [YamlProperty("BitgoDepositDetector.CircleWalletsGrpcServiceUrl")]
+        public string CircleWalletsGrpcServiceUrl { get; set; }
     }
 }
