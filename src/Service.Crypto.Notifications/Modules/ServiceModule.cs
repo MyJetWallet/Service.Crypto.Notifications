@@ -5,6 +5,7 @@ using Service.Bitgo.DepositDetector.Domain.Models;
 using Service.Bitgo.WithdrawalProcessor.Domain.Models;
 using Service.Circle.Wallets.Client;
 using Service.Circle.Webhooks.Domain.Models;
+using Service.ClientRiskManager.ServiceBus.FraudDetection;
 using Service.ClientRiskManager.Subscribers;
 using Service.Crypto.Notifications.Subscribers;
 using Service.Fireblocks.Webhook.ServiceBus;
@@ -65,14 +66,21 @@ namespace Service.Crypto.Notifications.Modules
                 .RegisterMyServiceBusSubscriberSingle<SignalCircleChargeback>(
                     serviceBusClient,
                     SignalCircleChargeback.ServiceBusTopicName,
-                    "service-crypto-notifications",
+                    queueName,
                     TopicQueueType.Permanent);
 
             builder
                 .RegisterMyServiceBusSubscriberSingle<SignalCircleCard>(
                     serviceBusClient,
                     SignalCircleCard.ServiceBusTopicName,
-                    "service-crypto-notifications",
+                    queueName,
+                    TopicQueueType.Permanent);
+
+            builder
+                .RegisterMyServiceBusSubscriberSingle<FraudDetectedMessage>(
+                    serviceBusClient,
+                    FraudDetectedMessage.TopicName,
+                    queueName,
                     TopicQueueType.Permanent);
 
             builder
@@ -117,6 +125,11 @@ namespace Service.Crypto.Notifications.Modules
 
             builder
                 .RegisterType<OfferBlockStateChangedSubscriber>()
+                .AutoActivate()
+                .SingleInstance();
+
+            builder
+                .RegisterType<FraudDetectedSubscriber>()
                 .AutoActivate()
                 .SingleInstance();
 
