@@ -49,7 +49,7 @@ namespace Service.Crypto.Notifications.Subscribers
                     $"Card Fraud Detected ⚠️ \r\n" +
                     $"Client is BLOCKED! \r\n" +
                     $"ClientId: {message.ClientFraud.ClientId} \r\n" +
-                    $"Type: {message.ClientFraud.Type} \r\n";
+                    $"Type: {message.ClientFraud.Type} \r\n");
                 } else
                 {
                     await _telegramBotClient.SendTextMessageAsync(chatId,
