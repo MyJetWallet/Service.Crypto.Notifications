@@ -43,13 +43,22 @@ namespace Service.Crypto.Notifications.Subscribers
 
                 var chatId = Program.Settings.CircleChatId;
 
-                await _telegramBotClient.SendTextMessageAsync(chatId,
-                $"Fraud Detected ⚠️ \r\n" +
-                $"Client is BLOCKED! \r\n" +
-                $"ClientId: {message.ClientFraud.ClientId} \r\n" +
-                $"Type: {message.ClientFraud.Type} \r\n" +
-                $"CardFraudDetected: {message.ClientFraud.CardFraudDetected} \r\n" +
-                $"Attempts3dsFailedCount: {message.ClientFraud.Attempts3dsFailedCount} \r\n");
+                if (message.ClientFraud.CardFraudDetected)
+                {
+                    await _telegramBotClient.SendTextMessageAsync(chatId,
+                    $"Card Fraud Detected ⚠️ \r\n" +
+                    $"Client is BLOCKED! \r\n" +
+                    $"ClientId: {message.ClientFraud.ClientId} \r\n" +
+                    $"Type: {message.ClientFraud.Type} \r\n";
+                } else
+                {
+                    await _telegramBotClient.SendTextMessageAsync(chatId,
+                    $"Payment Fraud Detected ⚠️ \r\n" +
+                    $"Client is BLOCKED! \r\n" +
+                    $"ClientId: {message.ClientFraud.ClientId} \r\n" +
+                    $"Type: {message.ClientFraud.Type} \r\n" +
+                    $"Attempts3dsFailedCount: {message.ClientFraud.Attempts3dsFailedCount} \r\n");
+                }
 
                 _deduplicationCache.AddItem(message.ClientFraud.ClientId);
 
