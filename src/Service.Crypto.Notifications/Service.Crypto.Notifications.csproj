@@ -22,7 +22,7 @@
     <PackageReference Include="MyJetWallet.Service.Bitgo.WithdrawalProcessor.Client" Version="2.12.0" />
     <PackageReference Include="MyJetWallet.Service.ClientRiskManager.Client" Version="1.1.0" />
     <PackageReference Include="MyJetWallet.Service.Fireblocks.Webhook.Client" Version="1.5.2" />
-    <PackageReference Include="MyJetWallet.Service.HighYieldEngine.Client" Version="1.0.94" />
+    <PackageReference Include="MyJetWallet.Service.HighYieldEngine.Client" Version="1.0.97" />
     <PackageReference Include="MyJetWallet.Service.Service.KYC.Client" Version="1.5.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="6.0.0" />
