@@ -42,6 +42,10 @@ namespace Service.Crypto.Notifications.Modules
                 Topics.FireblocksDepositSignalTopic,
                 queueName, TopicQueueType.Permanent);
 
+            builder.RegisterMyServiceBusSubscriberSingle<FireblocksDepositWrongAssetSignal>(serviceBusClient,
+                FireblocksDepositWrongAssetSignal.ServiceBusMessageTopic,
+                queueName, TopicQueueType.Permanent);
+
             builder.RegisterMyServiceBusSubscriberSingle<Deposit>(serviceBusClient,
                 Deposit.TopicName,
                 queueName, TopicQueueType.Permanent);
@@ -95,6 +99,11 @@ namespace Service.Crypto.Notifications.Modules
 
             builder
                .RegisterType<FireblocksDepositSignalSubscriber>()
+               .AutoActivate()
+               .SingleInstance();
+
+            builder
+               .RegisterType<FireblocksDepositWrongAssetSignalSubscriber>()
                .AutoActivate()
                .SingleInstance();
 
