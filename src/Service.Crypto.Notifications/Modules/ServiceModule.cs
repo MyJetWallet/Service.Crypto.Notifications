@@ -14,6 +14,7 @@ using Service.HighYieldEngine.Client;
 using Service.HighYieldEngine.Domain.Models;
 using Service.HighYieldEngine.Domain.Models.Messages;
 using Service.KYC.Domain.Models;
+using Service.Unlimint.Webhooks.Client;
 using Telegram.Bot;
 
 namespace Service.Crypto.Notifications.Modules
@@ -33,6 +34,9 @@ namespace Service.Crypto.Notifications.Modules
                 Program.LogFactory);
 
             const string queueName = "service-crypto-notifications";
+
+            builder.RegisterSignalUnlimintTransferSubscriber(serviceBusClient, queueName,
+                TopicQueueType.Permanent);
 
             builder.RegisterMyServiceBusSubscriberSingle<FireblocksWithdrawalSignal>(serviceBusClient,
                 Topics.FireblocksWithdrawalSignalTopic,
@@ -141,6 +145,13 @@ namespace Service.Crypto.Notifications.Modules
                 .RegisterType<FraudDetectedSubscriber>()
                 .AutoActivate()
                 .SingleInstance();
+
+            builder
+                .RegisterType<Service.Crypto.Notifications.Subscribers.SignalUnlimintTransferSubscriber>()
+                .AutoActivate()
+                .SingleInstance();
+
+            
 
             builder.RegisterHighYieldEngineNotificationService(Program.Settings.HighYieldEngineServiceUrl);
         }
