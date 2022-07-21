@@ -49,19 +49,40 @@ namespace Service.Crypto.Notifications.Subscribers
                 if (string.IsNullOrEmpty(chatId))
                     return;
 
-                var status = deposit.Status switch
+                var prefixStatus = "";
+                var symbol = "";
+                var status = "";
+
+                switch (deposit.Status)
                 {
-                    DepositStatus.Error => "Failed ⚠️",
-                    DepositStatus.Processed => "Successful 👌",
-                    DepositStatus.Cancelled => "Cancelled",
-                    DepositStatus.ManualApprovalPending => "MANUAL APPROVAL PENDING",
-                    _ => ""
-                };
+                    case DepositStatus.ManualApprovalPending:
+                        status = "MANUAL APPROVAL PENDING";
+                        break;
+                    case DepositStatus.Processed:
+                        status = "Successful";
+                        symbol = "👌";
+                        break;
+                    case DepositStatus.Error:
+                        status = "Failed";
+                        symbol = "⚠️";
+                        break;
+                    case DepositStatus.Cancelled:
+                        status = "Cancelled";
+                        break;
+                    default:
+                        break;
+                }
+
+                if (deposit.BeneficiaryClientId == "MinDepositCollector")
+                {
+                    prefixStatus = "MIN ";
+                    symbol = "⚠️";
+                }
 
                 if (string.IsNullOrEmpty(status)) return;
 
                 var message =
-                    $"DEPOSIT {status}! ID:{deposit.Id} {deposit.Amount} {deposit.AssetSymbol} ({deposit.Network}). {Environment.NewLine}" +
+                    $"{prefixStatus}DEPOSIT {status} {symbol}! ID:{deposit.Id} {deposit.Amount} {deposit.AssetSymbol} ({deposit.Network}). {Environment.NewLine}" +
                     $" BrokerId: {deposit.BrokerId}; ClientId: {deposit.ClientId}. Retries:  {deposit.RetriesCount}";
 
                 await _telegramBotClient.SendTextMessageAsync(chatId, message);
